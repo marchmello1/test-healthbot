@@ -39,7 +39,7 @@ if st.button("Submit"):
             history = "\n".join(st.session_state['conversation_history'])
 
             # Invoke the LLM with the conversation history
-            response = llm_chain.invoke({"history": history, "query": query}).strip()
+            response = llm_chain.invoke({"history": history, "query": query}).content.strip()
 
             # Update the conversation history
             st.session_state['conversation_history'].append(f"User: {query}")
