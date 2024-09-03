@@ -1,9 +1,8 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain import RunnableLambda
 import openai
-
+from langchain import PromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.runnables import RunnableLambda
 # Access the OpenAI API key securely from Streamlit secrets
 config = st.secrets["api_keys"]
 openai_api_key = config["openai_api_key"]
