@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain import RunnableSequence
+from langchain import RunnableLambda
 import openai
 
 # Access the OpenAI API key securely from Streamlit secrets
@@ -29,8 +29,8 @@ chat_openai = ChatOpenAI(
     openai_api_key=openai_api_key
 )
 
-# Create a RunnableSequence (replaces LLMChain)
-llm_chain = RunnableSequence(prompt | chat_openai)
+# Create a RunnableLambda (replaces LLMChain)
+llm_chain = RunnableLambda(prompt | chat_openai)
 
 # Streamlit App
 st.title("Health Chatbot")
