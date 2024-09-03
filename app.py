@@ -2,7 +2,6 @@ import streamlit as st
 from langchain import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableLambda
-
 # Access the API key from the secrets configuration
 config = st.secrets["api_keys"]
 openai_api_key = config["openai_api_key"]
@@ -28,30 +27,39 @@ llm_chain = prompt | llm
 # Streamlit app layout
 st.title("Health Chatbot")
 
+# Display the conversation history in a chat-like format
+for i, message in enumerate(st.session_state['conversation_history']):
+    if i % 2 == 0:
+        st.chat_message("user", message)
+    else:
+        st.chat_message("assistant", message)
+
 # User input
-query = st.text_input("Ask your health-related question:")
+query = st.text_input("Ask your health-related question:", key="input")
 
 # Generate response when the user submits a question
-if st.button("Submit"):
+if st.button("Send", key="send"):
     if query:
-        with st.spinner("Thinking..."):
-            # Construct the conversation history
+        # Append the user's message to the conversation history
+        st.session_state['conversation_history'].append(f"User: {query}")
+        
+        with st.spinner("Assistant is typing..."):
+            # Construct the conversation history for the prompt
             history = "\n".join(st.session_state['conversation_history'])
 
             # Invoke the LLM with the conversation history
             response = llm_chain.invoke({"history": history, "query": query}).content.strip()
 
-            # Update the conversation history
-            st.session_state['conversation_history'].append(f"User: {query}")
+            # Append the assistant's response to the conversation history
             st.session_state['conversation_history'].append(f"Assistant: {response}")
 
-            # Display the response
-            st.success("Health Assistant's response:")
-            st.write(response)
+            # Refresh the page to display the new messages in the chat format
+            st.experimental_rerun()
     else:
         st.warning("Please enter a question.")
 
 # Option to clear the conversation history
 if st.button("Clear Conversation"):
     st.session_state['conversation_history'] = []
-    st.success("Conversation history cleared.")
+    st.experimental_rerun()
+
