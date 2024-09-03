@@ -1,5 +1,6 @@
 import streamlit as st
-from langchain import OpenAI, LLMChain
+from langchain import LLMChain
+from langchain_community.llms import OpenAI  # Importing from the correct module
 from langchain.prompts import PromptTemplate
 import openai
 
