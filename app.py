@@ -1,7 +1,7 @@
 import streamlit as st
-from langchain.chains import LLMChain
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from langchain import RunnableSequence
 import openai
 
 # Access the OpenAI API key securely from Streamlit secrets
@@ -19,12 +19,18 @@ User: {user_input}
 Assistant:
 """
 
-# Create a PromptTemplate and LLMChain
+# Create a PromptTemplate
 prompt = PromptTemplate(input_variables=["user_input"], template=template)
-llm_chain = LLMChain(
-    llm=ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo", openai_api_key=openai_api_key),  # Pass the API key here
-    prompt_template=prompt
+
+# Initialize the ChatOpenAI model
+chat_openai = ChatOpenAI(
+    temperature=0.7,
+    model="gpt-3.5-turbo",
+    openai_api_key=openai_api_key
 )
+
+# Create a RunnableSequence (replaces LLMChain)
+llm_chain = RunnableSequence(prompt | chat_openai)
 
 # Streamlit App
 st.title("Health Chatbot")
