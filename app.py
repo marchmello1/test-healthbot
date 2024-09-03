@@ -40,6 +40,7 @@ if st.button("Submit"):
 
             # Invoke the LLM with the conversation history
             response = llm_chain.invoke({"history": history, "query": query})
+            result = result.content.strip()
 
             # Update the conversation history
             st.session_state['conversation_history'].append(f"User: {query}")
@@ -47,7 +48,7 @@ if st.button("Submit"):
 
             # Display the response
             st.success("Health Assistant's response:")
-            st.write(response)
+            st.write(result)
     else:
         st.warning("Please enter a question.")
 
