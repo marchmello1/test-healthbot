@@ -1,50 +1,57 @@
 import streamlit as st
-import openai
 from langchain import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableLambda
-# Access the OpenAI API key securely from Streamlit secrets
+
+# Access the API key from the secrets configuration
 config = st.secrets["api_keys"]
 openai_api_key = config["openai_api_key"]
 
-# Initialize OpenAI API key
-openai.api_key = openai_api_key
+llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-3.5-turbo")
 
-# Define a custom prompt for the chatbot
+# Initialize the session state for conversation history
+if 'conversation_history' not in st.session_state:
+    st.session_state['conversation_history'] = []
+
+# Define the prompt template
 template = """
-You are a knowledgeable health assistant. When provided with symptoms or a health-related question, respond with a likely diagnosis, causes, and treatment recommendations.
+You are a health assistant. Continue the following conversation and answer the next question:
 
-User: {user_input}
+{history}
+
+User: {query}
 Assistant:
 """
+prompt = PromptTemplate(template=template, input_variables=["history", "query"])
+llm_chain = prompt | llm
 
-# Create a PromptTemplate
-prompt = PromptTemplate(input_variables=["user_input"], template=template)
-
-# Initialize the ChatOpenAI model
-chat_openai = ChatOpenAI(
-    temperature=0.7,
-    model="gpt-3.5-turbo",
-    openai_api_key=openai_api_key
-)
-
-# Create a RunnableLambda (replaces LLMChain)
-llm_chain = RunnableLambda(prompt | chat_openai)
-
-# Streamlit App
+# Streamlit app layout
 st.title("Health Chatbot")
-st.write("Ask any health-related question or describe your symptoms to get advice.")
 
 # User input
-user_input = st.text_input("Enter your symptoms or question:")
+query = st.text_input("Ask your health-related question:")
 
-if user_input:
-    # Get the response from GPT-3.5
-    response = llm_chain.run({"user_input": user_input})
-    
-    # Display the response
-    st.write(response)
+# Generate response when the user submits a question
+if st.button("Submit"):
+    if query:
+        with st.spinner("Thinking..."):
+            # Construct the conversation history
+            history = "\n".join(st.session_state['conversation_history'])
 
-# Run the Streamlit app
-if __name__ == "__main__":
-    st._run()
+            # Invoke the LLM with the conversation history
+            response = llm_chain.invoke({"history": history, "query": query})
+
+            # Update the conversation history
+            st.session_state['conversation_history'].append(f"User: {query}")
+            st.session_state['conversation_history'].append(f"Assistant: {response}")
+
+            # Display the response
+            st.success("Health Assistant's response:")
+            st.write(response)
+    else:
+        st.warning("Please enter a question.")
+
+# Option to clear the conversation history
+if st.button("Clear Conversation"):
+    st.session_state['conversation_history'] = []
+    st.success("Conversation history cleared.")
