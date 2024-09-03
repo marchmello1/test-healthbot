@@ -1,6 +1,6 @@
 import streamlit as st
 from langchain.chains import LLMChain
-from langchain_community.llms import OpenAI  # Updated to import from langchain_community
+from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import openai
 
@@ -22,7 +22,7 @@ Assistant:
 # Create a PromptTemplate and LLMChain
 prompt = PromptTemplate(input_variables=["user_input"], template=template)
 llm_chain = LLMChain(
-    llm=OpenAI(temperature=0.7, model="gpt-3.5-turbo", openai_api_key=openai_api_key),  # Pass the API key here
+    llm=ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo", openai_api_key=openai_api_key),  # Pass the API key here
     prompt_template=prompt
 )
 
