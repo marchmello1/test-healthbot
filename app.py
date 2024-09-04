@@ -43,7 +43,7 @@ if prompt := st.chat_input("Ask your health-related question:"):
     # Generate response
     with st.spinner("Thinking..."):
         history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state['conversation_history'] if msg['role'] == "user"])
-        response = llm_chain.invoke({"history": history, "query": prompt}).strip()
+        response = llm_chain.invoke({"history": history, "query": prompt}).content.strip()
 
         # Assistant message
         st.session_state['conversation_history'].append({"role": "assistant", "content": response})
