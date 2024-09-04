@@ -25,7 +25,7 @@ prompt = PromptTemplate(template=template, input_variables=["history", "query"])
 llm_chain = prompt | llm
 
 # Streamlit app layout
-st.title("Q&A Chatbot")
+st.title("Health Chatbot")
 
 # Chat display
 for message in st.session_state['conversation_history']:
