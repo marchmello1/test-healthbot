@@ -1,7 +1,6 @@
 import streamlit as st
 from langchain import PromptTemplate
 from langchain_openai import ChatOpenAI
-from langchain_core.runnables import RunnableLambda
 
 # Access the API key from the secrets configuration
 config = st.secrets["api_keys"]
@@ -15,7 +14,7 @@ if 'conversation_history' not in st.session_state:
 
 # Define the prompt template
 template = """
-You are a health assistant. Continue the following conversation and answer the next question:
+You are an assistant. Continue the following conversation and answer the next question:
 
 {history}
 
@@ -26,7 +25,7 @@ prompt = PromptTemplate(template=template, input_variables=["history", "query"])
 llm_chain = prompt | llm
 
 # Streamlit app layout
-st.title("Health Chatbot")
+st.title("Q&A Chatbot")
 
 # Chat display
 for message in st.session_state['conversation_history']:
@@ -34,16 +33,16 @@ for message in st.session_state['conversation_history']:
         st.markdown(message["content"])
 
 # User input
-if prompt := st.chat_input("Ask your health-related question:"):
+if user_input := st.chat_input("Ask your question:"):
     # User message
-    st.session_state['conversation_history'].append({"role": "user", "content": prompt})
+    st.session_state['conversation_history'].append({"role": "user", "content": user_input})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(user_input)
 
     # Generate response
     with st.spinner("Thinking..."):
         history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state['conversation_history'] if msg['role'] == "user"])
-        response = llm_chain.invoke({"history": history, "query": prompt}).content.strip()
+        response = llm_chain.invoke({"history": history, "query": user_input}).content.strip()
 
         # Assistant message
         st.session_state['conversation_history'].append({"role": "assistant", "content": response})
