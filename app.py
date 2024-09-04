@@ -28,28 +28,27 @@ llm_chain = prompt | llm
 # Streamlit app layout
 st.title("Health Chatbot")
 
+# Chat display
+for message in st.session_state['conversation_history']:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
 # User input
-query = st.text_input("Ask your health-related question:")
+if prompt := st.chat_input("Ask your health-related question:"):
+    # User message
+    st.session_state['conversation_history'].append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-# Generate response when the user submits a question
-if st.button("Submit"):
-    if query:
-        with st.spinner("Thinking..."):
-            # Construct the conversation history
-            history = "\n".join(st.session_state['conversation_history'])
+    # Generate response
+    with st.spinner("Thinking..."):
+        history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state['conversation_history'] if msg['role'] == "user"])
+        response = llm_chain.invoke({"history": history, "query": prompt}).strip()
 
-            # Invoke the LLM with the conversation history
-            response = llm_chain.invoke({"history": history, "query": query}).content.strip()
-
-            # Update the conversation history
-            st.session_state['conversation_history'].append(f"User: {query}")
-            st.session_state['conversation_history'].append(f"Assistant: {response}")
-
-            # Display the response
-            st.success("Health Assistant's response:")
-            st.write(response)
-    else:
-        st.warning("Please enter a question.")
+        # Assistant message
+        st.session_state['conversation_history'].append({"role": "assistant", "content": response})
+        with st.chat_message("assistant"):
+            st.markdown(response)
 
 # Option to clear the conversation history
 if st.button("Clear Conversation"):
